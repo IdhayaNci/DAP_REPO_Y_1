@@ -293,14 +293,29 @@ def transform_unemployment(start):
     return unemployment_df
 
 @op(
-    ins={"dataframe_1": In(pd.DataFrame), "dataframe_2": In([]), 'dataframe_3': In(pd.DataFrame)},
+    ins={"unemployment_df": In(pd.DataFrame), "cost_of_living_df": In(CostOfLivivngDataFrame), 'quality_of_life_sub_df': In(pd.DataFrame)},
     out=Out(pd.DataFrame)
 )
 
 def join(unemployment_df,cost_of_living_df,quality_of_life_sub_df) -> pd.DataFrame:
-    
+    # engine = create_engine(postgres_connection_string)
+    common_column = 'state'
+    query = """ SELECT * FROM cost_of_living_structured AS cost 
+    INNER JOIN unemployment_structured AS unemploy ON cost.{0} = unemploy.{0}
+    INNER JOIN quality_of_life_structured AS quality ON cost.{0} = quality.{0};""".format(common_column)
+    merged_df = pd.DataFrame()
+    merged_quality_df = pd.DataFrame()
+    # engine = create_engine(postgres_connection_string)
+    with engine.connect() as connection:
+        merged_df = sqlio.read_sql_query(text(query),connection)
+        required_columns = ['id', 'area_name', 'case_id', 'childcare_cost', 'county', 'food_cost','healthcare_cost', 'housing_cost', 'median_family_income', 'other_necessities_cost','taxes', 'total_cost', 'transportation_cost', '_id', 'fips_code', 'year', 'month', 'total_civilian_non_institutional_population_in_state.area', 'total_civilian_labor_force_in_state.area', 'percent_of_state.area_population', 'total_employment_in_state.area',
+       'percent_of_labor_force_employed_in_state.area','total_unemployment_in_state.area', 'percent_of_labor_force_unemployed_in_state.area', 'state', 'countyhelper', 'city', 'fips', 'zip', 'population',
+       'crime_rate', 'Unemployment', 'diversity_rank_race', 'diversity_rank_gender']
+        merged_quality_df = merged_df[required_columns]
 
-    return []
+        merged_quality_df = merged_quality_df.loc[:, ~merged_quality_df.columns.duplicated()]
+
+    return(merged_quality_df)
 
     
 
