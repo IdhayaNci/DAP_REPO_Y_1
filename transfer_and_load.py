@@ -15,6 +15,69 @@ my_dict = {'AL':'Alabama', 'AK':'Alaska', 'AZ':	'Arizona', 'AR': 'Arkansas', 'CA
 engine = create_engine(postgres_connection_string)
 logger = get_dagster_logger()
 
+
+CostOfLivivngDataFrame = create_dagster_pandas_dataframe_type(
+    name="CostOfLivivngDataFrame",
+    columns=[
+        PandasColumn.numeric_column(
+            name="id",
+            non_nullable=True # specify that the column shouldn't contain NAs
+        ),
+        PandasColumn.numeric_column(
+            name="case_id",
+            non_nullable=True
+        ),
+        PandasColumn.string_column(
+            name="state",
+            non_nullable=True
+        ),
+        PandasColumn.string_column(
+            name="area_name",
+            non_nullable=True
+        ),
+        PandasColumn.string_column(
+            name="county",
+            non_nullable=True
+        ),
+        PandasColumn.numeric_column(
+            name="housing_cost",
+            non_nullable=True
+        ),
+        PandasColumn.numeric_column(
+            name="food_cost",
+            non_nullable=True
+        ),
+        PandasColumn.numeric_column(
+            name="transportation_cost",
+            non_nullable=True
+        ),
+        PandasColumn.numeric_column(
+            name="healthcare_cost",
+            non_nullable=True
+        ),
+        PandasColumn.numeric_column(
+            name="other_necessities_cost",
+            non_nullable=True
+        ),
+        PandasColumn.numeric_column(
+            name="childcare_cost",
+            non_nullable=True
+        ),
+        PandasColumn.numeric_column(
+            name="taxes",
+            non_nullable=True
+        ),
+        PandasColumn.numeric_column(
+            name="total_cost",
+            non_nullable=True
+        ),
+        PandasColumn.numeric_column(
+            name="median_family_income",
+            non_nullable=True
+        )
+    ]
+)
+
 @op(
     ins={"start": In(bool)},
     out=Out([])
