@@ -1,12 +1,12 @@
 from dagster import job
 from extract import *
-from transform_and_load import *
-from visualisation import *
+from transfer_and_load import *
+from visualization import *
 from model import *
 @job
 def etl():# ETL function
     # Feed the joined data into model
-    classification_model(
+    model(
         # Visualize the joined data
         visualise(
         # Load the joined data into PostgreSQL

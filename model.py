@@ -11,8 +11,7 @@ from dagster import op, In
 @op(
     ins={"start": In(bool)}
 )
-
-def classification_model(start):
+def model(start):
     # PostgreSQL URI for Docker Instance
     postgres_connection_string = "postgresql://dap:dap@127.0.0.1:5432/dap"
 
@@ -31,13 +30,7 @@ def classification_model(start):
             threshold = cost_of_living_us_dataframe['total_cost'].median()
             cost_of_living_us_dataframe['Cost_of_Living_Category'] = (cost_of_living_us_dataframe['total_cost'] > threshold).astype(int)
             # Extract features  variable
-            X = cost_of_living_us_dataframe[['childcare_cost', 'food_cost', 'healthcare_cost', 'housing_cost',
-        'median_family_income', 'other_necessities_cost', 'taxes',
-        'transportation_cost', 'total_civilian_non_institutional_population_in_state.area',
-        'total_civilian_labor_force_in_state.area', 'percent_of_state.area_population',
-        'total_employment_in_state.area', 'percent_of_labor_force_employed_in_state.area',
-        'total_unemployment_in_state.area', 'percent_of_labor_force_unemployed_in_state.area',
-        'crime_rate', 'Unemployment', 'diversity_rank_race', 'diversity_rank_gender']]
+            X = cost_of_living_us_dataframe[['childcare_cost', 'food_cost', 'healthcare_cost', 'housing_cost','median_family_income', 'other_necessities_cost', 'taxes','transportation_cost', 'total_civilian_non_institutional_population_in_state.area','total_civilian_labor_force_in_state.area', 'percent_of_state.area_population','total_employment_in_state.area', 'percent_of_labor_force_employed_in_state.area','total_unemployment_in_state.area', 'percent_of_labor_force_unemployed_in_state.area','crime_rate', 'Unemployment', 'diversity_rank_race', 'diversity_rank_gender']]
             # Extract target  variable
             y = cost_of_living_us_dataframe['Cost_of_Living_Category']
 
@@ -69,8 +62,9 @@ def classification_model(start):
             html_output = "<p>{}</p>".format(print_statement)
 
             # Write the HTML content to a file or display it
-            with open("print_to_html.html", "w") as html_file: 
-                html_file.write(html_output)
+            # with open("print_to_html.html", "w") as html_file: 
+            #     html_file.write(html_output)
+            return True
     except exc.SQLAlchemyError as dbError:
         print ("PostgreSQL Error", dbError)
     finally:
