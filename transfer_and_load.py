@@ -78,6 +78,56 @@ CostOfLivivngDataFrame = create_dagster_pandas_dataframe_type(
     ]
 )
 
+UnemploymentDataFrame = create_dagster_pandas_dataframe_type(
+    name="UnemploymentDataFrame",
+    columns=[
+        PandasColumn.string_column(
+            name="fips_code",
+            non_nullable=True # specify that the column shouldn't contain NAs
+        ),
+        PandasColumn.string_column(
+            name="state",
+            non_nullable=True    
+        ),
+        PandasColumn.string_column(
+            name="year",
+            non_nullable=True    
+        ),
+        PandasColumn.string_column(
+            name="month",
+            non_nullable=True    
+        ),
+        PandasColumn.string_column(
+            name="total_civilian_non_institutional_population_in_state.area",
+            non_nullable=True    
+        ),
+        PandasColumn.string_column(
+            name="total_civilian_labor_force_in_state.area",
+            non_nullable=True
+        ),
+        PandasColumn.float_column(
+            name="percent_of_state.area_population",
+            non_nullable=True
+        ),
+        PandasColumn.string_column(
+            name="total_employment_in_state.area",
+            non_nullable=True
+        ),
+        PandasColumn.float_column(
+            name="percent_of_labor_force_employed_in_state.area",
+            non_nullable=True    
+        ),
+        PandasColumn.string_column(
+            name="total_unemployment_in_state.area",
+            non_nullable=True    
+        ),
+        PandasColumn.float_column(
+            name="percent_of_labor_force_unemployed_in_state.area",
+            non_nullable=True    
+        )
+    ]
+)
+
 @op(
     ins={"start": In(bool)},
     out=Out(CostOfLivivngDataFrame)
