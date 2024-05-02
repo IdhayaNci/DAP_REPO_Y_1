@@ -4,25 +4,28 @@ from transform_and_load import *
 from visualisation import *
 from model import *
 @job
-def etl():
+def etl():# ETL function
+    # Feed the joined data into model
     classification_model(
+        # Visualize the joined data
         visualise(
         # Load the joined data into PostgreSQL
             load(
-             # Join the flights and weather data
+             # Join the three data
                 join(
-                # Transform the stored flights data
+                # Transform the stored unemployment data
                     transform_unemployment(
-                    # Extract and store the flights data
+                    # Extract and store the unemployment data
                         extract_unemployment()
                     ),
-                # Transform the stored weather data
+                # Transform the stored cost_of_living data
                     transform_cost_of_living(
-                    # Extract and store the weather data
+                    # Extract and store the cost_of_living data
                         extract_cost_of_living()
                     ),
+                # Transform the stored quality_of_life data
                     transform_quality_of_life(
-                    # Extract and store the weather data
+                    # Extract and store the quality_of_life data
                         extract_quality_of_life()
                     )
                 )

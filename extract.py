@@ -5,7 +5,9 @@ from dagster import op, Out, In, get_dagster_logger
 from datetime import date, datetime
 from pymongo import MongoClient, errors
 import numpy as np
+import psycopg2
 
+# MongoDB URI for Docker Instance
 mongo_connection_string = "mongodb://127.0.0.1:27017"
 
 logger = get_dagster_logger()
@@ -95,16 +97,13 @@ def extract_quality_of_life() -> bool:
     return result
 
 
-
 @op(
     out=Out(bool)
 )
 
 def extract_cost_of_living() -> bool:
-     
     result = False
     try:
-         
         # Load the cost_of_living data into a Pandas data frame
         cost_of_living_df = pd.read_csv("cost_of_living_us_dap2.xls")
         cost_of_living_df.drop(columns=['isMetro'], inplace=True)
@@ -166,6 +165,9 @@ def extract_cost_of_living() -> bool:
                 array.append(ris)
 
             cassandra_session.execute(insert_string, array)
+            
+           
+    # Trap and handle errors
     except Exception as err:
         logger.error("Error: %s" % err)
     
