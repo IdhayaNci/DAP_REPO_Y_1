@@ -203,13 +203,52 @@ def transform_cost_of_living(start):
     cost_of_living_df.to_sql('cost_of_living_structured', engine, if_exists='replace', index=False)
     return(cost_of_living_df)
 
-@op(
-    ins={"start": In(bool)},
-    out=Out([])
-)
-
 def transform_quality_of_life(start):
-   return []
+    # Connect to the MongoDB database
+    client = MongoClient(mongo_connection_string)
+    # Connect to the flights collection
+    quality_of_life_db = client["quality_of_life"]
+    # Retrieve the data from the collection, flatten it and
+    # return a Pandas data frame
+    quality_of_life_df = pd.json_normalize(list(quality_of_life_db.quality_of_life.find({})))
+    # Create a dictionary with column names as the key and the object (string) 
+    # type as the value. This will be used to specify data types for the
+    # data frame. We will change some of these types later.
+    
+    keys = my_dict.keys()
+    key_list = list(keys)
+
+    for key in key_list:
+        quality_of_life_df['LSTATE'] = quality_of_life_df['LSTATE'].replace(key, my_dict[key])
+    quality_of_life_df = quality_of_life_df.rename(columns={'LSTATE': 'state', 'NMCNTY': 'city', 'FIPS': 'fips', 'LZIP': 'zip', '2022 Population': 'population', '2016 Crime Rate': 'crime_rate', 'Unemployment': 'Unemployment','Diversity Rank (Race)': 'diversity_rank_race','Diversity Rank (Gender)': 'diversity_rank_gender' })
+    required_columns = ['countyhelper', 'state', 'city', 'fips', 'zip', 'population', 'crime_rate', 'Unemployment', 'diversity_rank_race', 'diversity_rank_gender']
+    quality_of_life_sub_df = quality_of_life_df[required_columns]
+    quality_of_life_sub_df["crime_rate"] = ((quality_of_life_sub_df["crime_rate"].str.split('/', expand=True)[0].astype(int)) / 1000)
+    quality_of_life_datatypes = dict(zip(quality_of_life_sub_df.columns, [object]*len(quality_of_life_sub_df.columns)))
+
+    # quality_of_life_sub_df['crime_rate'] = quality_of_life_sub_df['crime_rate'].astype(int)
+    
+
+    # quality_of_life_sub_df = quality_of_life_sub_df.astype(quality_of_life_datatypes)
+    quality_of_life_datatypes = dict(
+        zip(quality_of_life_sub_df.columns, [object]*len(quality_of_life_sub_df.columns))
+    )
+
+    for column in ["fips", "zip","diversity_rank_race","diversity_rank_gender"]:
+        quality_of_life_datatypes[column] = np.int32
+
+    for column in ["crime_rate"]:
+        quality_of_life_datatypes[column] = np.float64
+
+    quality_of_life_sub_df = quality_of_life_sub_df.astype(quality_of_life_datatypes)
+    quality_of_life_sub_df = quality_of_life_sub_df.drop_duplicates(subset=['city'], keep='first')
+    print(len(quality_of_life_sub_df), 'quality_of_life_sub_df')
+    # quality_of_life_sub_df.drop(["_id"],axis=1,inplace=True)
+    # quality_of_life_sub_df.to_excel("quality_of_life.xlsx") 
+    quality_of_life_sub_df.to_sql('quality_of_life_structured', engine, if_exists='replace', index=False)
+    return quality_of_life_sub_df
+
+
 
 
 
