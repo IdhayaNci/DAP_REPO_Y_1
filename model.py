@@ -11,8 +11,8 @@ from dagster import op, In
 @op(
     ins={"start": In(bool)}
 )
-
-def classification_model(start):
+def model(start):
+    # PostgreSQL URI for Docker Instance
     postgres_connection_string = "postgresql://dap:dap@127.0.0.1:5432/dap"
 
     # A query to return all columns from unemployment_quality_of_life_cost_of_life Table
@@ -27,54 +27,46 @@ def classification_model(start):
                 text(query_string), 
                 connection
             )
-            print('Here Model')
             threshold = cost_of_living_us_dataframe['total_cost'].median()
             cost_of_living_us_dataframe['Cost_of_Living_Category'] = (cost_of_living_us_dataframe['total_cost'] > threshold).astype(int)
-# Extract features and target variable
-        # X = cost_of_living_us_dataframe[['taxes', 'total_unemployment_in_state.area', 'crime_rate']]
-        # y = cost_of_living_us_dataframe['total_cost']
-            X = cost_of_living_us_dataframe[['total_unemployment_in_state.area', 'crime_rate', 'taxes']]
+            # Extract features  variable
+            X = cost_of_living_us_dataframe[['childcare_cost', 'food_cost', 'healthcare_cost', 'housing_cost','median_family_income', 'other_necessities_cost', 'taxes','transportation_cost', 'total_civilian_non_institutional_population_in_state.area','total_civilian_labor_force_in_state.area', 'percent_of_state.area_population','total_employment_in_state.area', 'percent_of_labor_force_employed_in_state.area','total_unemployment_in_state.area', 'percent_of_labor_force_unemployed_in_state.area','crime_rate', 'Unemployment', 'diversity_rank_race', 'diversity_rank_gender']]
+            # Extract target  variable
             y = cost_of_living_us_dataframe['Cost_of_Living_Category']
 
-# Split data into train and test sets
+            # Split data into train and test sets
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Initialize Random Forest classifier
+            # Initialize Random Forest classifier
             clf = RandomForestClassifier()
 
-# Train the model
+            # Train the model
             clf.fit(X_train, y_train)
 
-# Make predictions on the test set
+            # Make predictions on the test set
             y_pred = clf.predict(X_test)
 
-# Evaluate the model
+            # Evaluate the model
             accuracy = accuracy_score(y_test, y_pred)
             print("Accuracy:", accuracy)
             print(classification_report(y_test, y_pred))
+            print_statement = classification_report(y_test, y_pred)
+            feature_importances = clf.feature_importances_
+
+            # Create a DataFrame to display feature importances
+            feature_importance_df = pd.DataFrame({'Feature': X.columns, 'Importance': feature_importances})
+            feature_importance_df = feature_importance_df.sort_values(by='Importance', ascending=False)
+
+            print("\nFeature Importance:")
+            print(feature_importance_df)
+            html_output = "<p>{}</p>".format(print_statement)
+
+            # Write the HTML content to a file or display it
+            # with open("print_to_html.html", "w") as html_file: 
+            #     html_file.write(html_output)
+            return True
     except exc.SQLAlchemyError as dbError:
         print ("PostgreSQL Error", dbError)
     finally:
         if engine in locals(): 
             engine.close()
-    
-# Separate features (X) and target variable (y)
-
-
-# Split the data into training and testing sets
-
-
-# Standardize features
-
-
-# Train a Random Forest classifier
-
-
-# Print the best parameters found by grid search
-
-
-# Evaluate the model
-
-
-# Classification report
-
