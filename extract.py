@@ -61,7 +61,30 @@ def extract_quality_of_life() -> bool:
     result = True
     try:
         # Connect to the MongoDB database
-        print('Hello World')
+        client = MongoClient(mongo_connection_string)
+        
+        # Connect to the quality of life database
+        quality_of_life_db = client["quality_of_life"]
+        
+        # Connect to the quality of life collection
+        quality_of_life_collection = quality_of_life_db["quality_of_life"]
+    
+        # Open the file containing the data
+        with open("qol.json","r") as ql:
+            # Load the JSON data from the file
+            data = json.load(ql)
+        for quality_of_life in data:
+            try:
+                    # Create a key for the MongoDB collection. This 
+                    # ensures that we cannot have duplicate documents
+                    key="{} {} {}".format(quality_of_life["NMCNTY"],quality_of_life["FIPS"],quality_of_life["LZIP"])
+                    quality_of_life["_id"] = key
+                    # Insert the quality of life data as a document in the quality of life collection
+                    quality_of_life_collection.insert_one(quality_of_life)
+                # Trap and handle duplicate key errors
+            except errors.DuplicateKeyError as err:
+                logger.error("Error: %s" % err)
+                continue
                 
     # Trap and handle other errors
     except Exception as err:
@@ -70,6 +93,7 @@ def extract_quality_of_life() -> bool:
     
     # Return a Boolean indicating success or failure
     return result
+
 
 
 @op(
