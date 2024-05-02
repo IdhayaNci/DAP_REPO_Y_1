@@ -320,21 +320,50 @@ def join(unemployment_df,cost_of_living_df,quality_of_life_sub_df) -> pd.DataFra
     
 
 @op(
-    ins={"start": In(pd.DataFrame)},
+    ins={"merged_quality_df": In(pd.DataFrame)},
     out=Out(bool)
 )
 
-def load(start):
+def load(merged_quality_df):
     try:
-        
-        with engine.connect() as conn:
+        # Create a connection to the PostgreSQL database
+        # engine = create_engine(
+        #     postgres_connection_string,
+        #     poolclass=NullPool
+        # )
 
-            logger.info("{} records loaded".format(0))
+        database_datatypes = dict(zip(merged_quality_df.columns,[VARCHAR]*len(merged_quality_df.columns)))
+    
+        for column in ["percent_of_state.area_population","percent_of_labor_force_employed_in_state.area","percent_of_labor_force_unemployed_in_state.area","case_id","housing_cost","food_cost","transportation_cost","healthcare_cost", "other_necessities_cost", "childcare_cost", "taxes", "total_cost", "median_family_income", "crime_rate"]:
+            database_datatypes[column] = DECIMAL
+        
+        # Set columns with INT datatype
+        for column in [ "fips", "zip", "diversity_rank_race", "diversity_rank_gender", "total_civilian_non_institutional_population_in_state.area", "total_civilian_labor_force_in_state.area", "total_employment_in_state.area", "total_unemployment_in_state.area"]:
+            database_datatypes[column] = INT
+        # merged_quality_df.to_excel("output.xlsx") 
+        # Open the connection to the PostgreSQL server
+        with engine.connect() as conn:
+            # Store the data frame contents to the flight_weather 
+            # table, using the dictionary of data types created
+            # above and replacing any existing table
+            print('merged_quality_df_app')
+            rowcount = merged_quality_df.to_sql(
+                name="unemployment_quality_of_life_cost_full",
+                con=engine,
+                index=False,
+                if_exists="replace"
+            )
+            print(rowcount,'merged_quality_df')
+            logger.info("{} records loaded".format(rowcount))
             
+        # Close the connection to PostgreSQL and dispose of 
+        # the connection engine
         engine.dispose(close=True)
         
-        return 0 > 0
+        # Return the number of rows inserted
+        return rowcount > 0
     
+    # Trap and handle any relevant errors
     except exc.SQLAlchemyError as error:
         logger.error("Error: %s" % error)
         return False
