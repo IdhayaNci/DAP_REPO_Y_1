@@ -18,7 +18,34 @@ logger = get_dagster_logger()
 def extract_unemployment() -> bool:
     result = True
     try:
-        print('hello world!')
+        # Connect to the MongoDB database
+        client = MongoClient(mongo_connection_string)
+        
+        # Connect to the unemployment database
+        unemployment_db = client["unemployment"]
+        
+        # Connect to the unemployment collection
+        unemployment_collection = unemployment_db["unemployment"]
+    
+        # Open the file containing the data
+        with open("unemployment_in_US_per_US_state.json","r") as fh:
+            # Load the JSON data from file
+            data = json.load(fh)
+        for unemployment in data:
+            try:
+                    # Create a key for the MongoDB collection. This 
+                    # ensures that we cannot have duplicate documents
+                    key="{} {} {}".format(unemployment["year"],unemployment["month"],unemployment["state"]["area"])
+                    unemployment["_id"] = key
+                    # Insert the unemployment data as a document in the unemployment 
+                    # collection
+                    unemployment_collection.insert_one(unemployment)
+                # Trap and handle duplicate key errors
+            except errors.DuplicateKeyError as err:
+                logger.error("Error: %s" % err)
+                continue
+                
+    # Trap and handle other errors
     except Exception as err:
         logger.error("Error: %s" % err)
         result = False
