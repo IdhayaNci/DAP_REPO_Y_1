@@ -78,6 +78,52 @@ CostOfLivivngDataFrame = create_dagster_pandas_dataframe_type(
     ]
 )
 
+QualityOfLifeDataFrame = create_dagster_pandas_dataframe_type(
+    name="QualityOfLifeDataFrame",
+    columns=[
+        PandasColumn.string_column(
+            name="countyhelper",
+            non_nullable=True # specify that the column shouldn't contain NAs
+        ),
+        PandasColumn.string_column(
+            name="state",
+            non_nullable=True    
+        ),
+        PandasColumn.string_column(
+            name="city",
+            non_nullable=True    
+        ),
+        PandasColumn.numeric_column(
+            name="fips",
+            non_nullable=True    
+        ),
+        PandasColumn.numeric_column(
+            name="zip",
+            non_nullable=True    
+        ),
+        PandasColumn.string_column(
+            name="population",
+            non_nullable=True
+        ),
+        PandasColumn.float_column(
+            name="crime_rate",
+            non_nullable=True
+        ),
+        PandasColumn.string_column(
+            name="Unemployment",
+            non_nullable=True
+        ),
+        PandasColumn.numeric_column(
+            name="diversity_rank_race",
+            non_nullable=True    
+        ),
+        PandasColumn.numeric_column(
+            name="diversity_rank_gender",
+            non_nullable=True    
+        )
+    ]
+)
+
 UnemploymentDataFrame = create_dagster_pandas_dataframe_type(
     name="UnemploymentDataFrame",
     columns=[
