@@ -6,6 +6,7 @@ from datetime import date, datetime
 from pymongo import MongoClient, errors
 import numpy as np
 
+mongo_connection_string = "mongodb://127.0.0.1:27017"
 
 logger = get_dagster_logger()
 
